@@ -1,0 +1,7 @@
+#!/bin/sh
+# Diversion script: /unslung/rc.xinetd
+#
+if ( [ ! -f /etc/inetd.conf ] || !(grep rrdsrv /etc/inetd.conf -q) ) then
+  echo "rrdsrv stream tcp nowait root /opt/bin/rrdtool - /var/rrd" >>/etc/inetd.conf
+fi
+return 1

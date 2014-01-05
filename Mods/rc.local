@@ -1,0 +1,12 @@
+#! /bin/sh
+# Diversion script: customize before starting crond
+#
+# Reason: intialize the serial port parameters for EDF teleinfo
+#
+/root/edf/init_edf
+/root/edf/capture
+#
+# Continue to start rc.local
+#
+return 1
+# EOF - include this line

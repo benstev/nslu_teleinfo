@@ -1,0 +1,3 @@
+#!/bin/sh
+export EDF_DEVICE=/dev/ttyUSB0
+stty -F $EDF_DEVICE 1200 evenp raw -hupcl cread -iexten -echo

@@ -1,0 +1,96 @@
+﻿* V3.2.1
+Isolement des keys Thingspeak et COSM hors code avant mise en Repo Github
+L'injection des clés dasn "miseajour" reste à faire...
+* V3.2
+Ajout de ThingSpeak en complement de Cosm, et en vu de l'abandon de ce dernier.
+Cosm est devenu Xively et est devenu payant.Modifs
+- miseajour : 
+	- on ajoute un curl vers ThingSpeak dans miseajour
+
+* V3.1
+Version de reconstruction apres la casse du flashdisk sur NSLU.
+Remise au point des sources pas bien synchronisées sur Ubuntu.
+Modifs
+- miseajour : 
+	les variables de PATH n'etaient pas bien positionnees, 
+	calcul du temp de départ de l'extraction minute de RRD calcule a la minute precedente pour ne pas ramener des minutes incompletes.
+	renforcment de l'extration de la ligne d'interet dans le retour RRD - pris en compte # lignes variable 
+- rc.xinetd : la bon path pour rrdtool (comment ca a pu marcher avant?).
+
+
+* V3
+On abandonne le principe de l'acquisition en fichier de la telemesure pendant une minute puis de son calcul de moyenne par script avant de stocker.
+Au lieu, on stockera directement chaque echantillon et on laissera RRD en faire la moyenne sur le delai d'acquisition (1mn). C'est son boulot
+Pour récupérer la valeur courante, on utilisera RRD (lastupdate);
+
+Adapter les CGI en conséquence.
+
+
+* V2.3
+Filtrage des valeurs erronnees dans le job par verification extensive de la structure de la ligne PAPP (regexp) 
+
+
+* V2.2
+On revient a une acquisition avec filtrage de PAPP dans le fichier telei par nfo.acq qu'on remplace
+Les problemes de valeur tronquees qui nous avait detourne de cette solution sont
+en fait des problemes de l'acquisition brute (bruit), et pas des problemes de
+filtrage.
+On rajoute l'isolement de la derniere valeur acquise (valeurcourante) pour
+assurer la continuite du graphe TR.
+
+Le job d'acquisition est lance par le job de stockage minute.
+
+Le job CRON calcule la moyenne de la dernière minut et l'envoie à COS et
+a RRD;
+Il faut egalement augmenter la frequence du job CRONTAB qui synchronise
+le System Time depuis la Hardware Clock (toutes les 30 minutes),
+pour eviter la perte d'une minute dans RRD par shift d'horloge.
+ 
+Mise en place des queries http; 
+les queries historiques renvoient le resultat brut du FETCH de RRD.
+la query TR renvoie la valeur courante.
+
+
+* V2.1
+On rechange le principe: on enregistre dans teleinfo.raw la minute d'acquisition, 
+puis on met a jour COSM et RRD toutes les minutes.
+La base RRD est donc à la minute au plus fin.
+
+* On cat le port serie dans teleinfo.raw 
+
+* Toutes les minutes: 
+	on interrompt l'acquisition, 
+	on filtre les valeurs de PAPP dans teleinfo.raw, 
+	on redemarre l'acquisition
+	on calcule la moyenne des acquisitions faites dans teleinfo acq,
+	on l'enregistre dans RRD et on la transmet a COSM;
+ 
+Pour les queries;
+GetCurrentValue: retourne la valeur de derniere valeur acquise
+GetPeriod: interroge la base RRD pour la periode donnee
+
+
+* V2
+Base sur RRDTOOL:
+On supprime l'acquisition brute dans le fichier teleinfo.raw qu'on remplace
+par une acquisition avec filtrage de PAPP et stockage immédiat dans RRDTOO
+(edf.rrd)
+
+Le job d'acquisition est lance par rc.local et tourne en permanence
+(pas d'overflow avec une base round robin).
+
+On modifie le job CRON toutes les minutes pur qu'il extraie la moyenne 
+de la dernière minute directemen depuis RRD et l'envoie à COSM;
+Il faut egalement augmenter la frequence du job CRONTAB qui synchronise
+le System Time depuis la Hardware Clock (toutes les 30 minutes),
+pour eviter la perte d'une minute dans RRD par shift.
+ 
+Mise en place des queries http; elles renvoient le resultat bruit du FETCH
+de RRD.
+
+
+* V1.2
+	Supprime IINST, garde que PAPP
+
+
+ 

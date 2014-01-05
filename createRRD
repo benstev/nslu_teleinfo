@@ -1,0 +1,8 @@
+#!/bin/sh
+export EDF_HOME=/root/edf
+# base de temps 1 minute
+# par minute : 1 # 60*24*7=10800 -> 1 semaine
+# par 1/4 d'heure : 15 # 90*24*4 = 8640 -> 3 mois
+# par heure : 60 # 24*365=8760 -> 1 an
+# par jour : 24*60=1440 # 365*3=1100 -> 3 ans
+rrdtool create /var/rrd/edf.rrd -s 60 DS:PAPP:GAUGE:120:0:10000 RRA:AVERAGE:0.5:1:10800 RRA:AVERAGE:0.5:15:8640 RRA:AVERAGE:0.5:60:8670 RRA:AVERAGE:0.5:1440:1100

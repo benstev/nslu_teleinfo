@@ -1,0 +1,33 @@
+#!/bin/sh
+export EDF_DEVICE=/dev/ttyUSB0
+export EDF_TEMP=/tmp
+export EDF_HOME=/root/edf
+export BIN=/opt/bin
+LC_NUMERIC="en_US.UTF-8"
+
+# si pas de demande de pause
+if [ ! -e $EDF_HOME/stop ]
+then
+
+  # get last minute from RRD
+
+  TIME=$(date +%s)
+  LM=$((($TIME-90)/60*60))
+
+  echo "fetch edf.rrd AVERAGE -s $LM -r60" | /usr/bin/nc localhost 13900 | \
+  $BIN/head -n 3 | $BIN/tail -n 1 | \
+  $BIN/gawk 'BEGIN {FS=":"} { print $2+0; fflush() }' > $EDF_TEMP/teleinfo.avg
+
+  PAPP=`cat $EDF_TEMP/teleinfo.avg`
+  
+  # mise a jour COSM, mise a jour ThingSpeak
+  
+  # test
+#  $BIN/curl --request PUT --header "X-PachubeApiKey: mypachubeAPIKey" --data-binary @$EDF_TEMP/teleinfo.avg "http://api.cosm.com/v2/feeds/95860/datastreams/PAPP.csv"
+  
+  # production
+  $BIN/curl --request PUT --header "X-PachubeApiKey: mypachubeAPIKey" --data-binary @$EDF_TEMP/teleinfo.avg "http://api.cosm.com/v2/feeds/95356/datastreams/PAPP.csv"
+
+  $BIN/curl --data "key=thinkspeakkey" --data "field1=$PAPP" "http://api.thingspeak.com/update"
+
+fi

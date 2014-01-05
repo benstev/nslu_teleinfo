@@ -1,0 +1,6 @@
+#!/bin/sh
+export EDF_DEVICE=/dev/ttyUSB0
+export EDF_TEMP=/tmp
+cat $EDF_DEVICE | \
+  gawk '/PAPP [0-9]{5}/ { print "update edf.rrd N:" $2+0; fflush() }' | \
+  nc localhost 13900 &
